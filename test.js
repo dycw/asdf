@@ -1,3 +1,6 @@
-const name = "yoshi";
+const greet = (name) => {
+  console.log(`hello, ${name}`);
+};
 
-console.log(name);
+greet("mario");
+greet("yoshi");
