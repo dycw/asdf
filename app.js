@@ -1,26 +1,48 @@
 const express = require("express");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
+const Blog = require("./models/blog");
 
 const app = express();
 
+require("dotenv").config();
+const password = process.env["PASSWORD"];
+const dbURI = `mongodb+srv://derek:${password}@cluster0.j5inzrs.mongodb.net/net-ninja-tutorials?retryWrites=true&w=majority`;
+mongoose
+  .connect(dbURI)
+  .then((result) => {
+    console.log("connected to db");
+    app.listen(8000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 app.set("view engine", "ejs");
 
-app.listen(8000);
+app.use(express.static("public"));
+app.use(morgan("dev"));
 
 app.use(express.static("public"));
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  const blogs = [
-    { title: "Yoshi finds eggs", snippet: "Lorem ipsum dolor sit amet" },
-    { title: "Mario finds stars", snippet: "Lorem ipsum dolor sit amet" },
-    { title: "How to defeat bowser", snippet: "Lorem ipsum dolor sit amet" },
-  ];
-  res.render("index", { title: "Home", blogs });
+  res.redirect("/blogs");
 });
 
 app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
+});
+
+app.get("/blogs", (req, res) => {
+  Blog.find()
+    .sort({ createdAt: -1 })
+    .then((result) => {
+      res.render("index", { title: "All blogs", blogs: result });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
 
 app.get("/blogs/create", (req, res) => {
